@@ -66,9 +66,9 @@ class World:
     evo_graph_toolbar:DesignerObject
     evo_toolbar_text:DesignerObject
     evo_toolbar_lower_text:DesignerObject
-    unknown_toolbar: DesignerObject
-    unknown_toolbar_upper_text:DesignerObject
-    unknown_toolbar_text: DesignerObject
+    add_animal_toolbar: DesignerObject
+    add_animal_toolbar_upper_text:DesignerObject
+    add_animal_toolbar_text: DesignerObject
 
 
     
