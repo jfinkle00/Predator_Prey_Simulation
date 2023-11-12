@@ -1,0 +1,663 @@
+import designer
+from designer import *
+from dataclasses import dataclass
+from random import randint
+import time
+import matplotlib.pyplot as plt
+set_window_size(1200,800)
+set_window_color("saddlebrown")
+SHEEP_SPEED = 0
+WOLF_SPEED = 0
+initial_sheep_sample = 17
+initial_wolf_sample = 5
+#The higher the lower the fertility rate. EX: 100 = 1/100 chance
+sheep_fertility_rate = 35
+wolf_fertility_rate = 250
+grass_growth_rate = 10
+
+
+class Animal(Emoji):
+    energy:int
+    speed:int
+    direction:int
+    speed_max:int
+
+class Plant(Rectangle):
+    energy:int
+    time_eaten:int
+
+
+
+@dataclass
+class World:
+    sheep_population: [Animal]
+    wolf_population: [Animal]
+    counter:DesignerObject
+    sheep_speed: int
+    wolf_speed: int
+    sheep_feritlity:int
+    wolf_fertility:int
+    grass: [Plant]
+    grass_growth:int
+    initialization: bool
+    sheep_score: int
+    wolf_score:int
+    grass_score:int
+    sheep_pop_data:[int]
+    wolf_pop_data:[int]
+    grass_pop_data:[int]
+    sheep_data:[int]
+    wolf_data: [int]
+    grass_data:[int]
+    graph_toolbar:DesignerObject
+    sheep_toolbar:DesignerObject
+    wolf_toolbar:DesignerObject
+    grass_toolbar:DesignerObject
+    graph_upper_text:DesignerObject
+    graph_text:DesignerObject
+    sheep_text:DesignerObject
+    sheep_upper_text: DesignerObject
+    wolf_text:DesignerObject
+    wolf_upper_text:DesignerObject
+    grass_text:DesignerObject
+    grass_upper_text:DesignerObject
+    top_toolbar: DesignerObject
+    reset_symbol:DesignerObject
+    evo_graph_toolbar:DesignerObject
+    evo_toolbar_text:DesignerObject
+    evo_toolbar_lower_text:DesignerObject
+    unknown_toolbar: DesignerObject
+    unknown_toolbar_upper_text:DesignerObject
+    unknown_toolbar_text: DesignerObject
+
+
+    
+
+
+def create_world()-> World:
+    """This function creates the world"""
+    return World([], [],text("white", "",1,400,50,), SHEEP_SPEED, WOLF_SPEED,sheep_fertility_rate,wolf_fertility_rate, [], grass_growth_rate,
+                  True,0,0,0,[],[],[],[],[],[], graph_toolbar(),sheep_panel(),wolf_panel(), grass_panel(),
+                 text("black", "Graphing", 24, 92, 750),text("black", "   Population  |  Energy", 18,90,780),text("black", "", 18,300,780),
+                 text("black", "Sheep Stats", 24,300,750),text("black", "", 18, 500, 780),
+                 text("black", "Wolf Stats", 24,500,750),text("black", "", 18, 700, 780),text("black", "Grass Stats",24,700,750)
+                 ,top_toolbar(),reset_symbol(), evo_graphing_toolbar(), text("black", "EvoGraphing", 24,900,750), text("black", "   Sheep  |  Wolves", 18,895,780),
+                 unknown_toolbar(), text("black","Add Animals", 24, 1100, 750), text("black", "  Sheep  |  Wolf", 18, 1095, 780))
+
+def create_sheep(x,y,z=0)-> DesignerObject:
+    """This function generates the individual
+    sheep."""
+    if z < 1:
+        individual_speed = randint(3,9)
+    else:
+        individual_speed = randint(z-1,z+1)
+        if individual_speed == 0:
+            individual_speed += 1
+    return Animal("🐑",energy=500,speed=3,direction=0,speed_max=individual_speed,x=x,y=y)
+
+def create_wolves(x,y,z=0)-> DesignerObject:
+    """This function genereate the individual
+    wolves.""" 
+    if z < 1:
+        indivudal_speed = randint(4,9)
+    else:
+        indivudal_speed = randint(z-1,z+1)
+        if indivudal_speed == 0:
+            indivudal_speed += 1
+    return Animal("🐺",energy=500,speed=3,direction=0,speed_max=indivudal_speed,x=x,y=y)
+
+
+def create_grass(x,y)-> DesignerObject:
+    """This function creates grass"""
+    return Plant("green", 50,50, energy=1000,time_eaten=0, x=x, y=y)
+
+
+def random_movement_sheep(world: World):
+    '''Randomly changes the speed of the sheep
+    basd on chance'''
+    for sheep in world.sheep_population:
+        random_number = randint(1,2)
+        flip_chance = randint(1,10)
+        if random_number == 1 and sheep.speed < sheep.speed_max:
+            sheep.speed += 2
+            if flip_chance == 1:
+                sheep.flip_x = False
+        elif random_number == 2 and sheep.speed > 0:
+            sheep.speed -= 1
+            if flip_chance == 1:
+                sheep.flip_x = True
+
+def spin_sheep(world:World):
+    """Randomly changes the direction angle of
+    of the sheep based on chance"""
+    for sheep in world.sheep_population:
+        random_number = randint(1,2)
+        if random_number ==1:
+            sheep.direction += 20
+        elif random_number ==2:
+            sheep.direction -= 20
+
+def move_sheep(world:World):
+    """Moves the sheep and subtracts energy"""
+    for sheep in world.sheep_population:
+        if sheep.speed > 0:
+            sheep.energy -=2
+        move_forward(sheep,sheep.speed,sheep.direction)
+
+def random_movement_wolves(world: World):
+    """randomly moves the wolves"""
+    for wolf in world.wolf_population:
+        random_number = randint(1,2)
+        if random_number == 1 and wolf.speed < wolf.speed_max:
+            wolf.speed += 2
+        elif random_number == 2 and wolf.speed > 0:
+            wolf.speed -= 1
+
+def spin_wolves(world:World):
+    """randomly changes the direction angle
+    of the wolf based on chance"""
+    for wolf in world.wolf_population:
+        random_number = randint(1,4)
+        if random_number == 1:
+            wolf.direction += 20
+        elif random_number == 2:
+            wolf.direction -= 20
+
+def move_wolves(world:World):
+    """Moves the wolves and subtracts energy"""
+    for wolf in world.wolf_population:
+        if wolf.speed > 0:
+            wolf.energy -= 2
+        move_forward(wolf,wolf.speed,wolf.direction)
+
+def initial_sheep_population(world: World):
+    """Creates the initial sheep population"""
+    if world.initialization:
+        for num in range(0,initial_sheep_sample,1):
+            world.sheep_population.append(create_sheep(randint(40,1160),randint(40,660)))
+        
+def initial_wolf_population(world: World):
+    """Creates the initial wolf population"""
+    if world.initialization:
+        for num in range (0,initial_wolf_sample,1):
+            world.wolf_population.append(create_wolves(randint(40,1160),randint(40,660)))
+
+def initial_grass_population(world: World):
+    """Creates the initial grass population"""
+    if world.initialization:
+        for num in range(50,750,50):
+            world.grass.append(create_grass(0,num))
+            world.grass.append(create_grass(50,num))
+            world.grass.append(create_grass(100,num))
+            world.grass.append(create_grass(150,num))
+            world.grass.append(create_grass(200,num))
+            world.grass.append(create_grass(250,num))
+            world.grass.append(create_grass(300,num))
+            world.grass.append(create_grass(350,num))
+            world.grass.append(create_grass(400,num))
+            world.grass.append(create_grass(450,num))
+            world.grass.append(create_grass(500,num))
+            world.grass.append(create_grass(550,num))
+            world.grass.append(create_grass(600,num))
+            world.grass.append(create_grass(650,num))
+            world.grass.append(create_grass(700,num))
+            world.grass.append(create_grass(750,num))
+            world.grass.append(create_grass(800,num))
+            world.grass.append(create_grass(850,num))
+            world.grass.append(create_grass(900,num))
+            world.grass.append(create_grass(950,num))
+            world.grass.append(create_grass(1000,num))
+            world.grass.append(create_grass(1050,num))
+            world.grass.append(create_grass(1100,num))
+            world.grass.append(create_grass(1150,num))
+            world.grass.append(create_grass(1200,num))
+
+def initialization_process(world: World):
+    """Allows certain functions to run
+    before the simulation starts"""
+    if world.initialization == True:
+        world.initialization = False
+
+
+
+def spawn_sheep(world:World):
+    """This function spawns sheep based on
+    the fertility rate"""
+    random_chance = randint(1, world.sheep_feritlity)
+    if random_chance == 1 and world.sheep_population != []:
+        random_sheep = randint(0,len(world.sheep_population)-1)
+        sheep_location_x = get_x(world.sheep_population[random_sheep])
+        sheep_location_y = get_y(world.sheep_population[random_sheep])
+        inherited_speed = world.sheep_population[random_sheep].speed_max + world.sheep_speed
+        world.sheep_population.append(create_sheep(sheep_location_x,sheep_location_y, inherited_speed))
+
+def spawn_wolves(world:World):
+    """This function spawns wolves based on 
+    the fertility rate"""
+    random_chance = randint(1,world.wolf_fertility)
+    if random_chance == 1 and world.wolf_population != []:
+        random_wolf = randint(0,len(world.wolf_population)-1)
+        wolf_location_x = get_x(world.wolf_population[random_wolf])
+        wolf_location_y = get_y(world.wolf_population[random_wolf])
+        inherited_speed = world.wolf_population[random_wolf].speed_max + world.wolf_speed
+        world.wolf_population.append(create_wolves(wolf_location_x,wolf_location_y,inherited_speed))
+
+def spawn_grass(world:World):
+    """This function spawns grass based on the
+    growth rate"""
+    for hidden_grass in world.grass:
+        if get_visible(hidden_grass) == False and int(time.perf_counter()) - int(hidden_grass.time_eaten)  == world.grass_growth:
+            hidden_grass.energy += 1000
+            hidden_grass.time_eaten = 0
+            show(hidden_grass)
+
+def bounce_sheep_x(world: World):
+    """This function keeps the sheep on screen"""
+    for sheep in world.sheep_population:
+        if sheep.x > 1190:
+            sheep.direction += 180
+            sheep.speed += 2
+            sheep.flip_x = False
+        elif sheep.x < 10:
+            sheep.direction += 180
+            sheep.speed += 2
+            sheep.flip_x = True
+
+def bounce_wolves_x(world: World):
+    """This function keeps wolves on the screen"""
+    for wolf in world.wolf_population:
+        if wolf.x > 1190:
+            wolf.direction += 180
+            wolf.speed += 2
+        elif wolf.x < 10:
+            wolf.direction += 180
+            wolf.speed += 2
+
+def bounce_sheep_y(world: World):
+    """This function keeps the sheep on screen"""
+    for sheep in world.sheep_population:
+        if sheep.y > 690:
+            sheep.direction += 180
+            sheep.speed += 2
+        elif sheep.y < 40:
+            sheep.direction += 180
+            sheep.speed += 2
+
+def bounce_wolves_y(world:World):
+    """This function keeps wolves on the screen"""
+    for wolf in world.wolf_population:
+        if wolf.y > 690:
+            wolf.direction += 180
+            wolf.speed += 2
+        elif wolf.y < 40:
+            wolf.direction += 180
+            wolf.speed += 2
+
+def filter_from(old_list: [DesignerObject], elements_to_not_keep: [DesignerObject]) -> [DesignerObject]:
+    """This function detects elements that should be
+    removed and elements that should be kept"""
+    new_values = []
+    elements_to_destroy = []
+    for item in old_list:
+        if item in elements_to_not_keep:
+            elements_to_destroy.append(item)
+        else:
+            new_values.append(item)
+    for item in elements_to_destroy:
+        destroy(item)
+    return new_values
+
+def sheep_wolf_collision(world:World):
+    """This function checks for collision and destroys
+    the necessary objects"""
+    destroyed_sheep =[]
+    for sheep in world.sheep_population:
+        for wolf in world.wolf_population:
+            if colliding(sheep,wolf):
+                destroyed_sheep.append(sheep)
+    world.sheep_population = filter_from(world.sheep_population, destroyed_sheep)
+
+def filter_from_grass(old_list: [DesignerObject], elements_to_not_keep: [DesignerObject]) -> [DesignerObject]:
+    """This function hides the grass untill
+    it grows back."""
+    new_values = []
+    for item in old_list:
+        if item in elements_to_not_keep:
+            item.energy = 0
+            item.time_eaten = round(time.perf_counter())
+            new_values.append(hide(item))
+        else:
+            new_values.append(item)
+    return new_values
+
+def sheep_grass_collision(world:World):
+    """This function checks for collision and destroys
+    the necessary objects"""
+    destroyed_grass = []
+    for grass in world.grass:
+        for sheep in world.sheep_population:
+            if colliding(grass, sheep):
+                destroyed_grass.append(grass)
+                if sheep.energy + (grass.energy / 10) <= 1000:
+                    sheep.energy += (grass.energy / 10)
+                elif sheep.energy + (grass.energy / 10) > 1000:
+                    sheep.energy = 1000
+    world.grass = filter_from_grass(world.grass, destroyed_grass)
+
+def update_score(world:World):
+    """Updates the score"""
+    wolf_energy_total = 0
+    sheep_energy_total = 0
+    grass_energy_total = 0
+    grass_count = len(world.grass)
+    live_grass = 0
+    sheep_text = " Sheep: Energy | Pop: " + str(int(world.sheep_score)) + "/" + str(len(world.sheep_population)*5)
+    wolf_text = " | Wolf: Energy | Pop: " + str(int(world.wolf_score)) + "/" + str(len(world.wolf_population) * 5)
+    for grass in world.grass:
+        if get_visible(grass):
+            grass_energy_total += grass.energy
+            live_grass += 1
+    if grass_count != 0:
+        world.grass_score = grass_energy_total / grass_count
+    for wolf in world.wolf_population:
+        wolf_energy_total += wolf.energy
+    for sheep in world.sheep_population:
+        sheep_energy_total += sheep.energy
+    if world.sheep_population != []:
+        world.sheep_score = sheep_energy_total // len(world.sheep_population)
+    else:
+        world.sheep_score = 0
+    if world.wolf_population != []:
+        world.wolf_score = wolf_energy_total // len(world.wolf_population)
+    else:
+        world.wolf_score = 0
+    if world.initialization:
+        world.counter = text("black", "Sheep: " + str(int(world.sheep_score)) + " | Wolf:" + str(int(world.wolf_score)) + " | Grass: " + str(int(world.grass_score)), 18,600,10)
+    else:
+        world.counter.text = sheep_text + wolf_text + " | Grass: Energy | Pop: " + str(int(world.grass_score)) + "/" + str(int(live_grass / 5))
+
+
+
+def collect_data(world:World):
+    """Collects simulation data and stores it"""
+    if not world.initialization:
+        world.sheep_data.append(world.sheep_score)
+        world.wolf_data.append(world.wolf_score)
+        world.grass_data.append(world.grass_score)
+        
+
+def graph_data(world:World,x,y,button):
+    """Uses stored simulation data to
+    create plots."""
+    if x < 200 and x > 100 and y > 700 and button == "left":
+        plt.plot(world.sheep_data, label="Sheep")
+        plt.plot(world.wolf_data, label="Wolves")
+        plt.plot(world.grass_data, label="Grass")
+        plt.xlabel("Time (Days)")
+        plt.ylabel("Mean Energy")
+        plt.title("Ecosystem Energy over Time")
+        plt.legend()
+        plt.show()
+
+def collect_evolution_data(world:World, button:str,x,y):
+    """This function collects data related
+    to inheritable traits"""
+    if button == "left" and x > 900 and x < 1000 and y > 700:
+        wolf_speed_data =[]
+        for wolf in world.wolf_population:
+            wolf_speed_data.append(wolf.speed_max)
+        plt.hist(wolf_speed_data)
+        plt.xlabel("Trait:Speed")
+        plt.ylabel("Freqency of Indivudals")
+        plt.title("Frequency of Different Speeds in Wolves")
+        plt.show()
+    elif button == "left" and x > 800 and x < 900 and y > 700:
+        sheep_speed_data = []
+        for sheep in world.sheep_population:
+            sheep_speed_data.append(sheep.speed_max)
+        plt.hist(sheep_speed_data)
+        plt.xlabel("Trait:Speed")
+        plt.ylabel("Frequency of Individuals")
+        plt.title("Freqency of Different Speeds in Sheep")
+        plt.show()
+    
+
+def collect_pop_data(world:World):
+    """This function collects the total
+    population from each group and stores it"""
+    count = 0
+    if world.initialization == False:
+        if world.sheep_population != []:
+            world.sheep_pop_data.append(len(world.sheep_population * 5))
+        else:
+            world.sheep_pop_data.append(0)
+        if world.wolf_population != []:
+            world.wolf_pop_data.append(len(world.wolf_population * 5))
+        else:
+            world.wolf_pop_data.append(0)
+    
+        for grass in world.grass:
+            if get_visible(grass):
+                count += 1
+        world.grass_pop_data.append(count / 5)
+    
+
+def graph_pop_data(world:World,x,y,button):
+    """Uses stored simulation data to
+    create a plot"""
+    if x > 0 and x < 100 and y > 700 and button == "left":
+        plt.plot(world.sheep_pop_data, label="Sheep")
+        plt.plot(world.wolf_pop_data, label="Wolves")
+        plt.plot(world.grass_pop_data, label = "Grass")
+        plt.xlabel("Time (Days)")
+        plt.ylabel("Population Total")
+        plt.title("Ecosystem Population over Time")
+        plt.legend()
+        plt.show()
+
+def graph_toolbar():
+    """creates a rectangle to click
+    to access graphing."""
+    return rectangle("lightseagreen", 400,150,0,800)
+
+def sheep_panel():
+    """This function creates a rectangle
+    for sheep behavior mods."""
+    return rectangle("lavender", 200,150,300,800)
+
+def sheep_behavior_speed(world:World,x,y,button):
+    """This function will change sheep
+    attributes based on user input"""
+    if x > 200 and x < 300 and y > 700 and button == "left":
+        world.sheep_speed += 1
+    elif x > 200 and x < 300 and y > 700 and button == "right" and world.sheep_speed != 0:
+        world.sheep_speed -= 1
+
+def sheep_fertility(world:World,x,y,button):
+    """This function allows the user to change
+    the sheep spawn rate."""
+    if x > 300  and x < 400 and y > 700 and button == "left" and world.sheep_feritlity >= 10:
+        world.sheep_feritlity -= 5
+    elif x > 300 and x < 400 and y > 700 and button == "right":
+        world.sheep_feritlity += 5
+
+def wolf_panel():
+    """creates a rectangle to change wolf
+    speed settings."""
+    return rectangle("silver", 200,150,500,800)
+
+def wolf_behavior_speed(world:World,x,y,button):
+    """This function allows the user to 
+    change the speed of the wolves based on
+    input."""
+    if x > 400 and x < 500 and y > 700 and button == "left":
+        world.wolf_speed += 1
+    elif x > 400 and x < 500 and y > 700 and button == "right" and world.wolf_speed != 0:
+        world.wolf_speed -= 1
+
+def wolf_fertitliy(world:World,x,y,button):
+    """This function allows the user to
+    change the wolf spawn rate"""
+    if x > 500 and x < 600 and y > 700 and button == "left" and world.wolf_fertility >= 10:
+        world.wolf_fertility -= 5
+    elif x > 500 and x < 600 and y > 700 and button == "right":
+        world.wolf_fertility += 5
+
+
+def grass_panel():
+    """creates a rectangle to change the 
+    grass growth rate"""
+    return rectangle("aquamarine",200,150,700,800)
+
+def grass_behavior(world:World,x,y,button):
+    """This function changes the growth rate
+    for grass based on user input"""
+    if x > 600 and x < 800 and y > 700 and button == "right":
+        world.grass_growth += 5
+    elif x > 600 and x < 800 and y > 700 and button == "left" and world.grass_growth > 5:
+        world.grass_growth -= 5
+
+def evo_graphing_toolbar():
+    """This function creates a panel 
+    for the user to click on for evo
+    graphing"""
+    return rectangle("lightseagreen", 200,150,900,800)
+
+def unknown_toolbar():
+    """under construction"""
+    return rectangle("lavender", 200,150, 1100, 800)
+
+def update_sheep_button(world:World):
+    """This function tells the user the 
+    current value of a sheep parameter."""
+    world.sheep_text.text = " Speed:" + str(world.sheep_speed) + " Spawn:1/" + str(world.sheep_feritlity)
+
+def update_wolf_button(world:World):
+    """This function tells the user the 
+    current value of a wolf parameter."""
+    world.wolf_text.text = " Speed:" + str(world.wolf_speed) + " Spawn:1/" + str(world.wolf_fertility)
+
+def update_grass_button(world:World):
+    """This function updates the current
+    value of the grass parameter."""
+    world.grass_text.text = "Growth rate:" + str(world.grass_growth) + "s"
+
+
+
+def energy_death_wolves(world:World):
+    """This function kills off any wolves below or at
+    0 energy"""
+    dead_wolves = []
+    for wolf in world.wolf_population:
+        if wolf.energy <= 0:
+            dead_wolves.append(wolf)
+
+    world.wolf_population = filter_from(world.wolf_population, dead_wolves)
+
+
+def energy_gain_wolves(world:World):
+    """This function adds energy based on
+    wolf sheep collision"""
+    for wolf in world.wolf_population:
+        for sheep in world.sheep_population:
+            if colliding(wolf,sheep):
+                if wolf.energy + sheep.energy <= 1000:
+                    wolf.energy += sheep.energy
+                elif wolf.energy + sheep.energy > 1000:
+                    wolf.energy = 1000
+
+
+
+def energy_death_sheep(world:World):
+    """This function kills off any sheep below or at
+    0 energy"""
+    dead_sheep = []
+    for sheep in world.sheep_population:
+        if sheep.energy <= 0:
+            dead_sheep.append(sheep)
+    world.sheep_population = filter_from(world.sheep_population,dead_sheep)
+
+
+
+def restart_sim(x,y,button:str):
+    """This function resets the simulation
+    based on user input"""
+    if x > 1175 and y < 23 and button == "left":
+        restart()
+
+def end_sim(world:World):
+    """This function displays a game over message
+    when all the sheep and wolves are dead"""
+    if world.initialization == False:
+        if world.sheep_score == 0 and world.wolf_score == 0:
+            return text("white", "Simulation Over", 50,600,400)
+        
+def top_toolbar():
+    """This function creates a rectangle at
+    the top of the screen"""
+    return rectangle("lightseagreen", 1200,50,600,0)
+
+def reset_symbol():
+    """This function creates a symbol
+    in the top right corner of the screen"""
+    reset = emoji("🔄")
+    reset.x = 1189
+    reset.y = 13
+    reset.scale = 0.7
+    return reset
+
+def user_spawn_animals(world:World, button:str, x, y):
+    """This function allows the user
+    to spawn animals based on input"""
+    if button == "left" and x > 1000 and x < 1100 and y > 700:
+        world.sheep_population.append(create_sheep(randint(40,1160), randint(40,660)))
+    elif button == "left" and x > 1100 and x < 1200 and y > 700:
+        world.wolf_population.append(create_wolves(randint(40,1160), randint(40,660)))
+
+
+
+
+        
+        
+
+when("clicking", user_spawn_animals)
+when("clicking", collect_evolution_data)
+when("clicking", restart_sim)
+when("clicking", graph_pop_data)
+when("updating", energy_gain_wolves)
+when("updating", collect_pop_data)
+when("updating", energy_death_sheep)
+when("updating", energy_death_wolves)
+when("updating", update_grass_button)
+when("updating", update_wolf_button)
+when("updating", update_sheep_button)
+when("clicking", sheep_fertility)
+when("clicking", wolf_fertitliy)
+when("clicking", grass_behavior)
+when("clicking", wolf_behavior_speed)
+when("clicking", sheep_behavior_speed)
+when("clicking", graph_data)
+when("updating", collect_data)  
+when("updating", sheep_grass_collision)
+when("updating", sheep_wolf_collision)
+when("updating", bounce_wolves_y)
+when("updating", bounce_wolves_x)
+when("updating", bounce_sheep_y)
+when("updating", bounce_sheep_x)
+when("updating", spawn_wolves)       
+when("updating", spawn_sheep)
+when("updating", spawn_grass)
+when("updating", random_movement_wolves)
+when("updating", spin_wolves)
+when("updating", move_wolves)
+when("updating", move_sheep)
+when("updating", spin_sheep)
+when("updating", random_movement_sheep)
+when("updating", initial_grass_population)
+when("updating", update_score)
+when("updating", initial_wolf_population)
+when("updating", initial_sheep_population)
+when("updating", end_sim)
+when("updating", initialization_process)
+when("starting", create_world)
+start()
