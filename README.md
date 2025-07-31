@@ -17,6 +17,7 @@ Regrowing resources,
 Real-time graphing of population and trait evolution.
 
 🧩 Features
+
 🐑 Sheep: Consume grass, reproduce with inheritable speed traits, and die if energy is depleted.
 
 🐺 Wolves: Hunt sheep, gain energy from predation, reproduce with inheritable traits, and die if energy runs out.
