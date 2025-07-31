@@ -1,6 +1,9 @@
 🧬 Evolution Simulator
+
 A dynamic simulation modeling predator-prey ecosystem dynamics and evolution of traits over time
+
 📋 Description
+
 This Evolution Simulator is a visual, interactive predator-prey simulation built using the designer module in Python. It models the interactions between sheep (prey), wolves (predators), and grass (resources), incorporating:
 
 Reproduction with inheritable traits (speed),
