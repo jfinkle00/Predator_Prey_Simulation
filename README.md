@@ -44,38 +44,6 @@ Reset simulation anytime.
 
 Trigger graphing of population and traits from toolbar panels.
 
-▶️ How to Run
-Prerequisites:
-Python 3.7+
-
-designer module (https://pypi.org/project/designer/)
-
-matplotlib for plotting graphs
-
-Running the Simulation:
-bash
-Copy
-Edit
-python evolution_simulator.py
-🖱️ Controls & Toolbar Zones
-Feature	Action	Location (X, Y)
-Add Sheep	Left-click	(1000–1100, >700)
-Add Wolves	Left-click	(1100–1200, >700)
-Increase Sheep Speed	Left-click	(200–300, >700)
-Decrease Sheep Speed	Right-click	(200–300, >700)
-Increase Wolf Speed	Left-click	(400–500, >700)
-Decrease Wolf Speed	Right-click	(400–500, >700)
-Increase Grass Growth Time	Right-click	(600–800, >700)
-Decrease Grass Growth Time	Left-click	(600–800, >700)
-Increase Sheep Fertility	Right-click	(300–400, >700)
-Decrease Sheep Fertility	Left-click	(300–400, >700)
-Increase Wolf Fertility	Right-click	(500–600, >700)
-Decrease Wolf Fertility	Left-click	(500–600, >700)
-Graph Population	Left-click	(0–100, >700)
-Graph Energy Levels	Left-click	(100–200, >700)
-Graph Wolf Speed Histogram	Left-click	(900–1000, >700)
-Graph Sheep Speed Histogram	Left-click	(800–900, >700)
-Restart Simulation	Left-click	Top-right 🔄 button
 
 📊 Data Visualization
 Population Graph: Number of sheep, wolves, and grass patches over time.
